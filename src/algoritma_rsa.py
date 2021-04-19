@@ -12,7 +12,6 @@ def gcd(a, b):
         return a
 
 def modulusInverse(a, b):
-     
     for x in range(1, b):
         if (a * x) % b == 1:
             return x
@@ -32,15 +31,20 @@ def fast(x, y, z):
 
 
 def isPrime(x):
-    if x == 1:
-        return False
-    elif x == 2:
-        return True
-    else:
-        for i in range (2, x):
-            if (x % i == 0):
-                return False
-        return True
+    flag = True
+    if (x <= 1):
+        flag = False
+    # 2 and 3 are prime
+    elif (x >= 4):
+        if (x % 2 == 0 or x % 3 == 0):
+            flag = False    # x is not prime
+        else: 
+            j = int(pow(x, 1/2)) + 1
+            for i in range (5, j, 6):
+                if (x % i == 0 or x % (i+2) == 0):
+                    flag = False    # x is not prime
+                    break
+    return flag
 
 
 
@@ -72,27 +76,45 @@ def generateKey(p, q):
     return ((publicKey, n) , (privateKey, n))
 
 
-def encrypt(key, plaintext):
+def encrypt(key, message, mode):
     publicKey, n = key
     result = []
-    #cipherText = [pow(ord(x), publicKey, n) for x in plaintext]
-    for x in plaintext:
-        cipherText = pow(ord(x), publicKey, n)
-        result.append(hex(cipherText))
+
+    if(mode == '1'): #input text
+        for i in message:
+            cipher = pow(ord(i), publicKey, n)
+            result.append(hex(cipher))
+
+    else: #file
+        for i in message:
+            cipher = pow(i, publicKey, n)
+            result.append("%02X" % cipher)  # cipher format in 2-digit hex as string
+        result = codecs.decode(''.join(result), 'hex_codec').decode('latin-1')
+
     return result
     
 
-def decrypt(key, ciphertext):
+def decrypt(key, message, mode):
     privateKey, n = key
     result = []
-    for i in ciphertext:
-        plain = (int(i, 16) for i in ciphertext)
-    for j in plain:
-        p = pow(j, privateKey, n)
-        result.append(p)
+
+    if(mode == '1'): #input text
+        for i in message:
+            plain = (int(i, 16) for i in message)   # convert i from base 16 to base 10
+        for j in plain:
+            p = pow(j, privateKey, n)
+            result.append(p)
+            
+    else: #file
+        for i in message:
+            cipher = pow(i, privateKey, n)
+            result.append("%02X" % cipher)  # cipher format in 2-digit hex as string
+        result = codecs.decode(''.join(result), 'hex_codec').decode('latin-1')
+    
     return result
 
 
+'''
 if __name__ == '__main__':
 
     p = int(input(" Enter p (must a prime number): "))
@@ -118,3 +140,4 @@ if __name__ == '__main__':
 
 # p sama q paling ngga >= 11 (?)
 # n gabisa kurang dari ASCII plaintext
+'''

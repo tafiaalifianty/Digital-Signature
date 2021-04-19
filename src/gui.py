@@ -23,18 +23,22 @@ def encryptGUI():
     if(mode2 == '2'): #file key
         public = (int(openFile('.temporary-public', 'r').split()[0]), int(openFile('.temporary-public', 'r').split()[1]))
 
+    #start encrypt
     if(mode == '1'): #input message
         startTime = time.perf_counter()
-        lbl_result_text['text'] = encrypt(public, message)
+        lbl_result_text['text'] = encrypt(public, message, mode)
         endTime = time.perf_counter()
+
     elif(mode == '2'): #file message
         startTime = time.perf_counter()
         if(not(ent_file_name.get() and ent_file_ext.get())):
             messagebox.showerror('Error', 'Enter file name and extension!')
             return
-        text = encrypt(public, openFile('.temporary','r'))
+        # text = encrypt(public, openFile('.temporary','r'))
+
+        message = bytearray(encrypt(public, openFile('.temporary', 'rb'), mode), 'latin-1')
         filename = ent_file_name.get() + '.' + ent_file_ext.get()
-        writeFile(' '.join(text), filename, 'w')
+        writeFile(message, filename, 'wb')
         lbl_result_text['text'] = 'Success! Saved in ' + filename
         checkFileSize(filename)
         endTime = time.perf_counter()
@@ -54,18 +58,21 @@ def decryptGUI():
     if(mode2 == '2'): #file key
         private = (int(openFile('.temporary-private', 'r').split()[0]), int(openFile('.temporary-private', 'r').split()[1]))
 
+    #start decrypt
     if(mode == '1'): #input message
         startTime = time.perf_counter()
-        lbl_result_text['text'] = ''.join(chr(i) for i in decrypt(private, message.split()))
+        lbl_result_text['text'] = ''.join(chr(i) for i in decrypt(private, message.split(), mode))
         endTime = time.perf_counter()
+
     elif(mode == '2'): #file message
         startTime = time.perf_counter()
         if(not(ent_file_name.get() and ent_file_ext.get())):
             messagebox.showerror('Error', 'Enter file name and extension!')
             return
-        text = decrypt(private, openFile('.temporary', 'r').split())
+        # text = decrypt(private, openFile('.temporary', 'r').split())
+        message = bytearray(decrypt(private, openFile('.temporary', 'rb'), mode), 'latin-1')
         filename = ent_file_name.get() + '.' + ent_file_ext.get()
-        writeFile(''.join(chr(i) for i in text), filename, 'w')
+        writeFile(message, filename, 'wb')
         lbl_result_text['text'] = 'Success! Saved in ' + filename
         checkFileSize(filename)
         endTime = time.perf_counter()
@@ -211,10 +218,10 @@ def qExit():
 
 # Main window
 window = Tk()
-window.title('Encrypt & Decrypt')
+window.title('Digital Signature')
 
 # Title label
-lbl_title = Label(text='Welcome to RSA Encryption!')
+lbl_title = Label(text='Welcome to Digital Signature!')
 lbl_title.pack()
 
 frm_form = Frame(relief=RIDGE, borderwidth=3)
@@ -239,7 +246,7 @@ lbl_q.grid(row=2, column=0, padx=5, pady=5, sticky='w')
 ent_q.grid(row=2, column=1, padx=5, pady=5)
 
 # File
-btn_open = Button(master=frm_form, text='Open message', width=15, command= lambda: askOpenFile(1))
+btn_open = Button(master=frm_form, text='Open file', width=15, command= lambda: askOpenFile(1))
 btn_open.grid(row=3, column=1, padx=5, pady=5, sticky='w')
 lbl_file_status = Label(master=frm_form)
 lbl_file_status.grid(row=4, column=1, padx=5, pady=5, sticky='w')
