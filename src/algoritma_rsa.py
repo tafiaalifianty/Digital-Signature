@@ -45,16 +45,10 @@ def isPrime(x):
                     flag = False    # x is not prime
                     break
     return flag
-
-
+    
 
 def generateKey(p, q):
-    if p == q:
-        raise Exception("Sorry, p and q can't be equal")
-    elif not ((isPrime(p)) and (isPrime(q))):
-        raise Exception("Sorry, p and q must be prime")
-    
-    # if both numbers prime
+    # calculate n
     n = p * q
 
     # totient of n = (p-1)(q-1)
@@ -87,6 +81,7 @@ def encrypt(key, message, mode):
 
     else: #file
         for i in message:
+            print(i)
             cipher = pow(i, publicKey, n)
             result.append("%02X" % cipher)  # cipher format in 2-digit hex as string
         result = codecs.decode(''.join(result), 'hex_codec').decode('latin-1')

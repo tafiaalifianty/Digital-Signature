@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 from tkinter.filedialog import askopenfile
+from pathlib import Path
 from algoritma_rsa import *
 import time
 import os
@@ -82,14 +83,22 @@ def decryptGUI():
 def computeKey():
     try:
         global public, private
-        if not (ent_p.get().isnumeric() and ent_q.get().isnumeric()):
-            raise Exception("Enter p and q please!")
+        checkErrorKey()
         public, private = generateKey(int(ent_p.get()), int(ent_q.get()))
         lbl_public_text['text'] = public
         lbl_private_text['text'] = private
     except Exception as e:
         messagebox.showerror('Error', e)
 
+def checkErrorKey():
+    p = ent_p.get()
+    q = ent_q.get()
+    if not (p.isnumeric() and q.isnumeric()):
+        raise Exception("Enter p and q please!")
+    elif p == q:
+        raise Exception("Sorry, p and q can't be equal")
+    elif not (isPrime(int(p)) and isPrime(int(q))):
+        raise Exception("Sorry, p and q must be prime")
 
 def checkErrorInput():
     status = True
@@ -114,7 +123,7 @@ def checkErrorFile():
             messagebox.showerror('Error', 'Open file first!')
             status = False
         else: # success
-            if(ent_key.get() == ''):
+            if(ent_p.get() == '' or ent_q.get() == ''):
                 messagebox.showerror('Error', 'Enter key!')
                 status = False
             elif(not(ent_file_name.get() and ent_file_ext.get())):
@@ -129,19 +138,19 @@ def askOpenFile(mode):
         if (mode==1):
             writeFile(f.read(),'.temporary', 'wb')
             var1.set(2)
-            lbl_file_status['text'] = 'Message file successfully loaded'
+            lbl_file_status['text'] = 'File "' + Path(f.name).name + '" successfully loaded'
         elif (mode==2):
             writeFile(f.read(),'.temporary-public', 'wb')
             public = (int(openFile('.temporary-public', 'r').split()[0]), int(openFile('.temporary-public', 'r').split()[1]))
             lbl_public_text['text'] = public
             var2.set(2)
-            lbl_file_status['text'] = 'Public key successfully loaded'
+            lbl_file_status['text'] = 'Public key "' + Path(f.name).name + '" successfully loaded'
         elif (mode==3):
             writeFile(f.read(),'.temporary-private', 'wb')
             private = (int(openFile('.temporary-private', 'r').split()[0]), int(openFile('.temporary-private', 'r').split()[1]))
             lbl_private_text['text'] = private
             var2.set(2)
-            lbl_file_status['text'] = 'Private key successfully loaded'
+            lbl_file_status['text'] = 'Private key "' + Path(f.name).name + '" successfully loaded'
 
 # Open file in read only
 def openFile(file, mode):
@@ -179,16 +188,21 @@ def copy():
 
 # Save key function
 def saveKey():
-    if(lbl_public_text['text'] == ''):
-        messagebox.showerror('Error', 'Enter key please!')
-        return
-    text_public = bytearray(lbl_public_text['text'], 'latin-1')
-    text_private = bytearray(lbl_private_text['text'], 'latin-1')
-    filename_public = 'public-key.pub'
-    filename_private = 'private-key.pri'
-    writeFile(lbl_public_text['text'], filename_public, 'w')
-    writeFile(lbl_private_text['text'], filename_private, 'w')
-    lbl_file_status['text'] = 'Success! Saved in ' + filename_public + ' and ' + filename_private
+    try:
+        checkErrorKey()
+        if(lbl_public_text['text'] == '' or lbl_private_text['text'] == ''):
+            computeKey()
+
+        text_public = bytearray(lbl_public_text['text'], 'latin-1')
+        text_private = bytearray(lbl_private_text['text'], 'latin-1')
+        filename_public = 'public-key.pub'
+        filename_private = 'private-key.pri'
+        writeFile(lbl_public_text['text'], filename_public, 'w')
+        writeFile(lbl_private_text['text'], filename_private, 'w')
+        lbl_file_status['text'] = 'Success! Saved in ' + filename_public + ' and ' + filename_private
+    except Exception as e:
+        messagebox.showerror('Error', e)
+
 
 # Save function
 def save():
@@ -251,7 +265,7 @@ btn_open.grid(row=3, column=1, padx=5, pady=5, sticky='w')
 lbl_file_status = Label(master=frm_form)
 lbl_file_status.grid(row=4, column=1, padx=5, pady=5, sticky='w')
 
-btn_clear = Button(master=frm_form, text='Clear', width=5, command=clear)
+btn_clear = Button(master=frm_form, text='Clear', width=9, command=clear)
 btn_clear.grid(row=3, column=1, padx=5, pady=5, sticky='e')
 
 # Key file
@@ -355,7 +369,7 @@ lbl_filesize_text.grid(row=21, column=1, padx=5, pady=5, sticky="w")
 
 btn_save = Button(master=frm_form, text='Save ciphertext to file', width=18, command=save)
 btn_save.grid(row=22, column=1, padx=5, pady=5, sticky="w")
-btn_exit = Button(master=frm_form, text='Exit', width=5, command=qExit)
+btn_exit = Button(master=frm_form, text='Exit', width=9, command=qExit)
 btn_exit.grid(row=22, column=1, padx=5, pady=5, sticky='e')
 
 
