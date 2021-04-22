@@ -23,7 +23,7 @@ class App(Tk):
         tabControl.add(self.tab1, text = "Pembangkitan Kunci")
 
         self.tab2 = ttk.Frame(tabControl)
-        tabControl.add(self.tab2, text = "Pembangkitkan tanda tangan")
+        tabControl.add(self.tab2, text = "Pembangkitan tanda tangan")
 
         self.tab3 = ttk.Frame(tabControl)
         tabControl.add(self.tab3, text = "Verifikasi tanda tangan")
